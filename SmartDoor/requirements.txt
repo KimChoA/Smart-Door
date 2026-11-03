@@ -1,0 +1,10 @@
+# 원본 실행 환경의 버전 정보가 없어 버전을 고정하지 않았습니다.
+Flask
+Flask-SocketIO
+Werkzeug
+numpy
+opencv-python
+ultralytics
+torch
+gpiozero
+lgpio

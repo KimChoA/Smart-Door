@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<meta name="csrf-token" content="{{ csrf_token }}">
+
+<title>Smart Guard Home</title>
+
+<style>
+
+:root {
+
+    --blue: #5397d9;
+
+    --dark: #253c52;
+
+    --muted: #8192a6;
+
+    --bg: #f4f8fc;
+
+    --line: #e0ebf5;
+
+    --red: #d74f5e;
+
+}
+
+* {
+
+    box-sizing: border-box;
+
+}
+
+body {
+
+    margin: 0;
+
+    background: var(--bg);
+
+    color: var(--dark);
+
+    font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+
+}
+
+button {
+
+    font: inherit;
+
+    cursor: pointer;
+
+    border: none;
+
+    border-radius: 12px;
+
+    padding: 13px;
+
+    font-weight: 700;
+
+}
+
+.hidden {
+
+    display: none !important;
+
+}
+
+.app {
+
+    max-width: 520px;
+
+    margin: auto;
+
+    padding-bottom: 20px;
+
+    min-height: 100dvh;
+
+}
+
+header {
+
+    background: white;
+
+    padding: 24px 18px 18px;
+
+    border-bottom: 1px solid var(--line);
+
+}
+
+header h1 {
+
+    font-size: 21px;
+
+    margin: 0;
+
+}
+
+header h1 span {
+
+    color: var(--blue);
+
+}
+
+header p {
+
+    font-size: 12px;
+
+    color: var(--muted);
+
+    margin: 6px 0 0;
+
+}
+
+main {
+
+    padding: 14px;
+
+}
+
+.card {
+
+    background: white;
+
+    padding: 18px;
+
+    border: 1px solid var(--line);
+
+    border-radius: 18px;
+
+    margin-bottom: 14px;
+
+    box-shadow: 0 5px 18px #3a64900a;
+
+}
+
+.heading {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 15px;
+
+}
+
+.heading h2 {
+
+    font-size: 16px;
+
+    margin: 0;
+
+}
+
+.chip {
+
+    font-size: 11px;
+
+    color: #8191a1;
+
+    background: #f0f4f7;
+
+    padding: 6px 10px;
+
+    border-radius: 30px;
+
+    white-space: nowrap;
+
+}
+
+.chip.online {
+
+    background: #e5f7ed;
+
+    color: #278859;
+
+}
+
+.stats {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+}
+
+.stat {
+
+    background: #f3f8fd;
+
+    border-radius: 12px;
+
+    padding: 15px 12px;
+
+}
+
+.stat small {
+
+    font-size: 11px;
+
+    color: var(--muted);
+
+    display: block;
+
+    margin-bottom: 9px;
+
+}
+
+.stat strong {
+
+    font-size: 15px;
+
+}
+
+.primary {
+
+    color: white;
+
+    background: var(--blue);
+
+}
+
+.soft {
+
+    color: #397ebd;
+
+    background: #e9f4ff;
+
+}
+
+.danger {
+
+    color: #cc4556;
+
+    background: #fff0f0;
+
+}
+
+.full {
+
+    width: 100%;
+
+}
+
+.small {
+
+    font-size: 12px;
+
+    color: var(--muted);
+
+    line-height: 1.6;
+
+}
+
+.actions {
+
+    display: flex;
+
+    gap: 9px;
+
+    margin-top: 12px;
+
+}
+
+.actions button {
+
+    flex: 1;
+
+}
+
+.notice {
+
+    padding: 14px;
+
+    border-radius: 13px;
+
+    background: #edf6ff;
+
+    color: #317bb8;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+
+}
+
+.notice.alert {
+
+    background: #fff0f0;
+
+    color: #c64b59;
+
+}
+
+.camera {
+
+    position: relative;
+
+    background: #182b40;
+
+    aspect-ratio: 16 / 10;
+
+    border-radius: 13px;
+
+    overflow: hidden;
+
+    display: grid;
+
+    place-items: center;
+
+    color: #c4d1df;
+
+    text-align: center;
+
+}
+
+.camera img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: contain;
+
+    position: absolute;
+
+    inset: 0;
+
+}
+
+.camera .placeholder {
+
+    font-size: 13px;
+
+    padding: 20px;
+
+    line-height: 1.7;
+
+}
+
+.camera-toggle {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 8px;
+
+}
+
+.camera-toggle button {
+
+    white-space: nowrap;
+
+    font-size: 12px;
+
+}
+
+.doorbell-box {
+
+    text-align: center;
+
+    padding: 8px 0 2px;
+
+}
+
+.doorbell-icon {
+
+    width: 70px;
+
+    height: 70px;
+
+    margin: 0 auto 12px;
+
+    background: #eaf4ff;
+
+    border-radius: 23px;
+
+    display: grid;
+
+    place-items: center;
+
+    font-size: 34px;
+
+}
+
+.doorbell-box p {
+
+    font-size: 12px;
+
+    color: var(--muted);
+
+    line-height: 1.7;
+
+    margin: 0 0 14px;
+
+}
+
+.doorbell-button {
+
+    width: 100%;
+
+    padding: 16px;
+
+    border-radius: 14px;
+
+    background: var(--blue);
+
+    color: white;
+
+    font-size: 15px;
+
+    box-shadow: 0 5px 14px #5397d92b;
+
+}
+
+.record {
+
+    display: flex;
+
+    text-align: left;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 10px;
+
+    width: 100%;
+
+    border-radius: 0;
+
+    border-bottom: 1px solid var(--line);
+
+    background: white;
+
+    padding: 14px 3px;
+
+}
+
+.record:last-child {
+
+    border-bottom: 0;
+
+}
+
+.record strong {
+
+    display: block;
+
+    font-size: 13px;
+
+    margin-bottom: 6px;
+
+}
+
+.record small {
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+
+}
+
+.arrow {
+
+    font-size: 22px;
+
+    color: #a2b2c2;
+
+}
+
+.empty {
+
+    font-size: 12px;
+
+    color: var(--muted);
+
+}
+
+.test-grid {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 8px;
+
+}
+
+.test-grid button {
+
+    font-size: 12px;
+
+}
+
+.test-input {
+
+    border: 1px solid var(--line);
+
+    padding: 12px;
+
+    width: 100%;
+
+    border-radius: 12px;
+
+    margin-top: 12px;
+
+}
+
+.bottom {
+
+    position: fixed;
+
+    bottom: 0;
+
+    left: 0;
+
+    right: 0;
+
+    background: white;
+
+    border-top: 1px solid var(--line);
+
+    padding-bottom: env(safe-area-inset-bottom);
+
+    z-index: 10;
+
+}
+
+.nav {
+
+    max-width: 520px;
+
+    margin: auto;
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+}
+
+.nav button {
+
+    background: white;
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+    border-radius: 0;
+
+}
+
+.nav button.selected {
+
+    color: var(--blue);
+
+}
+
+.overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: #172b40ae;
+
+    z-index: 30;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: center;
+
+}
+
+.modal {
+
+    width: 100%;
+
+    max-width: 520px;
+
+    background: white;
+
+    border-radius: 24px 24px 0 0;
+
+    padding: 22px 18px calc(24px + env(safe-area-inset-bottom));
+
+    max-height: 90dvh;
+
+    overflow-y: auto;
+
+}
+
+.modal h2 {
+
+    font-size: 19px;
+
+    margin: 0 0 12px;
+
+}
+
+.modal p {
+
+    font-size: 13px;
+
+    color: var(--muted);
+
+    line-height: 1.6;
+
+    white-space: pre-wrap;
+
+}
+
+.modal .camera {
+
+    margin-top: 12px;
+
+}
+
+.photo {
+
+    max-width: 100%;
+
+    max-height: 55dvh;
+
+    object-fit: contain;
+
+    border-radius: 12px;
+
+    display: block;
+
+    margin: 14px auto;
+
+}
+
+.photo-note {
+
+    padding: 18px;
+
+    border-radius: 12px;
+
+    background: #f2f6fa;
+
+    color: var(--muted);
+
+    font-size: 12px;
+
+    text-align: center;
+
+}
+
+.toast {
+
+    position: fixed;
+
+    bottom: 86px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    background: #243a50;
+
+    color: white;
+
+    padding: 14px;
+
+    border-radius: 12px;
+
+    font-size: 12px;
+
+    z-index: 60;
+
+    max-width: 90%;
+
+    text-align: center;
+
+}
+
+/* 로그인 없이 열리는 관리자 화면의 원격 열기 PIN 확인 창 */
+
+#unlockDialog { border: 0; border-radius: 16px; padding: 22px; width: min(90vw, 360px); }
+
+#unlockDialog::backdrop { background: rgba(0, 0, 0, .5); }
+
+#unlockDialog label { display: block; margin: 12px 0; }
+
+#unlockDialog input { width: 100%; box-sizing: border-box; padding: 12px; font-size: 17px; }
+
+#unlockDialog .actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+#unlockDialog .actions button { padding: 9px 15px; }
+
+/* 홈에 통합한 기록 목록 */
+
+.records-scroll {
+
+    max-height: 340px;
+
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+
+}
+
+/* 홈: 출입 기록 / 보안 기록 가로 2버튼 */
+
+.records-actions {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-bottom: 14px;
+
+}
+
+.records-open {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    min-height: 100px;
+
+    color: #397ebd;
+
+    background: white;
+
+    border: 1px solid var(--line);
+
+    border-radius: 18px;
+
+    box-shadow: 0 5px 18px #3a64900a;
+
+    font-size: 15px;
+
+}
+
+.records-open > span:first-child { font-size: 24px; }
+
+.records-open small { color: var(--muted); font-size: 11px; }
+
+.records-open:active { background: #edf6ff; }
+
+#recordsOverlay { z-index: 32; }
+
+#detailOverlay { z-index: 34; }
+
+#detailOverlay.security-alert-photo { z-index: 44; }
+
+#visitorOverlay { z-index: 38; }
+
+.records-modal { display: flex; flex-direction: column; }
+
+.records-modal-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+}
+
+.records-modal-header h2 { margin: 0; }
+
+.records-modal-header button { padding: 9px 13px; font-size: 12px; }
+
+.records-modal .records-scroll { overflow-y: auto; max-height: 62dvh; }
+
+/* 접근 감지 알람: 닫기 전까지 표시 */
+
+#securityAlertOverlay { z-index: 42; }
+
+.security-alert-modal { text-align: center; }
+
+.security-alert-modal #securityAlertMessage {
+
+    color: var(--dark);
+
+    font-weight: 600;
+
+    font-size: 15px;
+
+}
+
+.alert-symbol {
+
+    display: grid;
+
+    place-items: center;
+
+    margin: 0 auto 14px;
+
+    width: 64px;
+
+    height: 64px;
+
+    border-radius: 20px;
+
+    font-size: 30px;
+
+    background: #fff1f1;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<dialog id="unlockDialog">
+
+  <form method="dialog" autocomplete="off">
+
+    <h3>원격 문 열기</h3>
+
+    <label for="unlockPassword">도어락 비밀번호</label>
+
+    <input id="unlockPassword" type="password" inputmode="numeric" autocomplete="off" required>
+
+    <div class="actions">
+
+      <button type="submit" value="confirm">문 열기</button>
+
+      <button type="submit" value="cancel" formnovalidate>취소</button>
+
+    </div>
+
+  </form>
+
+</dialog>
+
+<div class="app">
+
+<header>
+
+    <h1>Smart <span>Guard</span> Home</h1>
+
+    <p>스마트홈 실시간 보안 관리</p>
+
+</header>
+
+<main>
+
+<!-- 홈 화면 -->
+
+<section id="homePage">
+
+    <!-- 현재 보안 상태 -->
+
+    <div class="card">
+
+        <div class="heading">
+
+            <h2>🏠 현재 보안 상태</h2>
+
+            <span id="netChip" class="chip">연결 중</span>
+
+        </div>
+
+        <div class="stats">
+
+            <div class="stat">
+
+                <small>도어락</small>
+
+                <strong id="doorState">🔒 잠금</strong>
+
+            </div>
+
+            <div class="stat">
+
+                <small>보안 시스템</small>
+
+                <strong id="securityState">감시 중</strong>
+
+            </div>
+
+            <div class="stat">
+
+                <small>얼굴 인식</small>
+
+                <strong id="faceState">대기</strong>
+
+            </div>
+
+            <div class="stat">
+
+                <small>비밀번호 실패</small>
+
+                <strong id="failState">0회</strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 실시간 CCTV -->
+
+    <div class="card">
+
+        <div class="heading">
+
+            <h2>📹 현관 CCTV</h2>
+
+            <span id="camChip" class="chip">확인 중</span>
+
+        </div>
+
+        <div class="camera-toggle">
+
+            <span class="small">필요할 때만 영상 확인</span>
+
+            <button
+
+                class="soft"
+
+                id="toggleCamButton"
+
+                onclick="toggleCamera()"
+
+            >
+
+                영상 보기 ▾
+
+            </button>
+
+        </div>
+
+        <div
+
+            id="homeCamArea"
+
+            class="camera hidden"
+
+            style="margin-top:13px"
+
+        >
+
+            <div id="homeCamMessage" class="placeholder">
+
+                카메라 연결 대기
+
+            </div>
+
+            <img
+
+                id="homeCam"
+
+                class="hidden"
+
+                alt="현관 카메라 영상"
+
+            >
+
+        </div>
+
+    </div>
+
+    <!-- 기록은 홈에서 가로 버튼으로 열고, 목록은 팝업에서 확인 -->
+
+    <div class="records-actions" aria-label="기록 조회">
+
+        <button class="records-open" onclick="openRecords('access')">
+
+            <span aria-hidden="true">🔑</span>
+
+            <span>출입 기록</span>
+
+            <small id="accessCount">조회 중</small>
+
+        </button>
+
+        <button class="records-open" onclick="openRecords('security')">
+
+            <span aria-hidden="true">🛡️</span>
+
+            <span>보안 기록</span>
+
+            <small id="securityCount">조회 중</small>
+
+        </button>
+
+    </div>
+
+    <!-- 긴급 신고 -->
+
+    <div class="card">
+
+        <div class="heading">
+
+            <h2>🚨 긴급 신고</h2>
+
+        </div>
+
+        <p class="small">
+
+            실제 긴급 상황에서 확인 후 직접 신고합니다.
+
+        </p>
+
+        <button class="danger full" onclick="call112()">
+
+            📞 112 신고 전화 연결
+
+        </button>
+
+    </div>
+
+    <!-- 얼굴 신규 등록·보강: 두 번째 USB 카메라 사용 -->
+    <div class="card">
+        <div class="heading"><h2>👤 얼굴 등록·보강</h2><span class="chip">별도 카메라</span></div>
+        <p class="small">신규 사용자 등록 및 기존 등록자의 얼굴 데이터를 추가할 수 있습니다. 보안 CCTV는 그대로 작동합니다.</p>
+        <button class="primary full" type="button" onclick="window.open(window.location.protocol + '//' + window.location.hostname + ':5004/', '_blank', 'noopener,noreferrer')">📷 얼굴 등록·보강 페이지 열기 ↗</button>
+        <p class="small" style="margin-bottom:0">얼굴 등록 서버(5004)가 실행 중일 때 이용할 수 있습니다.</p>
+    </div>
+
+</section>
+
+</main>
+
+</div>
+
+<!-- 출입 기록 / 보안 기록 목록 팝업 -->
+
+<div id="recordsOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="recordsTitle">
+
+    <div class="modal records-modal">
+
+        <div class="records-modal-header">
+
+            <h2 id="recordsTitle">출입 기록</h2>
+
+            <button class="soft" onclick="closeRecords()" aria-label="기록 창 닫기">닫기 ✕</button>
+
+        </div>
+
+        <p id="recordsDescription" class="small">기록을 누르면 상세 정보를 확인할 수 있습니다.</p>
+
+        <div id="accessList" class="records-scroll empty">조회 중...</div>
+
+        <div id="securityList" class="records-scroll empty hidden">조회 중...</div>
+
+    </div>
+
+</div>
+
+<!-- 초인종 실시간 영상 팝업 -->
+
+<div id="visitorOverlay" class="overlay hidden">
+
+    <div class="modal">
+
+        <h2>🔔 현관 초인종 호출</h2>
+
+        <p>방문자가 초인종을 눌렀습니다.
+
+실시간 현관 영상을 확인한 후 출입 여부를 결정하세요.</p>
+
+        <p class="small">현재 실시간 현관 영상</p>
+
+        <div class="camera">
+
+            <div id="visitorMessage" class="placeholder">
+
+                실시간 카메라 연결 중...
+
+            </div>
+
+            <img
+
+                id="visitorCam"
+
+                class="hidden"
+
+                alt="방문자 실시간 영상"
+
+            >
+
+        </div>
+
+        <div class="actions">
+
+            <button class="primary" onclick="openDoor()">
+
+                🔓 문 열기
+
+            </button>
+
+            <button class="danger" onclick="rejectDoor()">
+
+                거절
+
+            </button>
+
+        </div>
+
+        <button
+
+            class="soft full"
+
+            style="margin-top:9px"
+
+            onclick="closeVisitor()"
+
+        >
+
+            닫기
+
+        </button>
+
+    </div>
+
+</div>
+
+<!-- 접근 감지 / 보안 경고 실시간 팝업 (홈 카드 없음) -->
+
+<div id="securityAlertOverlay" class="overlay hidden" role="alertdialog" aria-modal="true" aria-labelledby="securityAlertTitle" aria-describedby="securityAlertMessage">
+
+    <div class="modal security-alert-modal">
+
+        <div class="alert-symbol" aria-hidden="true">⚠️</div>
+
+        <h2 id="securityAlertTitle">보안 경고</h2>
+
+        <p id="securityAlertTime" class="small"></p>
+
+        <p id="securityAlertMessage">현관 접근이 감지되었습니다.</p>
+
+        <div class="actions">
+
+            <button id="securityAlertPhotoButton" class="primary" onclick="viewSecurityAlertPhoto()">📷 사진 확인</button>
+
+            <button class="soft" onclick="closeSecurityAlert()">닫기</button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 보안 기록 사진 팝업 -->
+
+<div id="detailOverlay" class="overlay hidden">
+
+    <div class="modal">
+
+        <h2 id="detailTitle">기록 상세</h2>
+
+        <p id="detailText"></p>
+
+        <img
+
+            id="detailImage"
+
+            class="photo hidden"
+
+            alt="보안 이벤트 촬영 사진"
+
+        >
+
+        <div id="detailEmpty" class="photo-note hidden">
+
+            저장된 사진이 없습니다.
+
+        </div>
+
+        <button class="soft full" onclick="closeDetail()">
+
+            닫기
+
+        </button>
+
+    </div>
+
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+<script>
+
+const $ = id => document.getElementById(id);
+
+let socket = null;
+
+let accessRows = [];
+
+let securityRows = [];
+
+let cameraAvailable = false;
+
+let homeCameraOpen = false;
+
+let lastSecurityEventId = null;
+
+const notifiedEventIds = new Set();
+
+let currentSecurityAlert = null;
+
+const pendingSecurityAlerts = [];
+
+let toastTimer;
+
+// 서버 API
+
+async function api(url, method = "GET", payload = null) {
+
+    const options = { method, credentials: "same-origin" };
+
+    if (method !== "GET") {
+
+        options.headers = {"X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content};
+
+    }
+
+    if (payload !== null) {
+
+        options.headers = {
+
+            ...(options.headers || {}),
+
+            "Content-Type": "application/json"
+
+        };
+
+        options.body = JSON.stringify(payload);
+
+    }
+
+    const response = await fetch(url, options);
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+        throw new Error(
+
+            data.message || `HTTP ${response.status}`
+
+        );
+
+    }
+
+    return data;
+
+}
+
+// 알림 메시지
+
+function toast(message) {
+
+    clearTimeout(toastTimer);
+
+    $("toast").textContent = message;
+
+    $("toast").classList.remove("hidden");
+
+    toastTimer = setTimeout(() => {
+
+        $("toast").classList.add("hidden");
+
+    }, 3500);
+
+}
+
+// 상태 갱신
+
+function updateStatus(data) {
+
+    const wasConnected = cameraAvailable;
+
+    $("doorState").textContent =
+
+        data.door_locked ? "🔒 잠금" : "🔓 열림";
+
+    $("securityState").textContent =
+
+        data.security_enabled ? "🟢 감시 중" : "⚪ 해제";
+
+    $("faceState").textContent =
+
+        data.face_status || "대기";
+
+    $("failState").textContent =
+
+        (data.failed_attempts || 0) + "회";
+
+    cameraAvailable = !!data.camera_connected;
+
+    $("camChip").textContent =
+
+        cameraAvailable ? "● LIVE" : "미연결";
+
+    $("camChip").classList.toggle(
+
+        "online",
+
+        cameraAvailable
+
+    );
+
+    // 초인종 시점에 카메라가 아직 준비되지 않았어도 연결되면 자동 표시
+
+    if (cameraAvailable && !wasConnected) {
+
+        if (!$("visitorOverlay").classList.contains("hidden")) {
+
+            mountCamera("visitorCam", "visitorMessage");
+
+        }
+
+        if (homeCameraOpen) {
+
+            mountCamera("homeCam", "homeCamMessage");
+
+        }
+
+    }
+
+}
+
+// 실시간 카메라 연결
+
+function mountCamera(imageId, messageId) {
+
+    const image = $(imageId);
+
+    const message = $(messageId);
+
+    image.onerror = () => {
+
+        image.classList.add("hidden");
+
+        message.textContent =
+
+            "카메라 영상을 불러올 수 없습니다.";
+
+        message.classList.remove("hidden");
+
+    };
+
+    image.onload = () => {
+
+        image.classList.remove("hidden");
+
+        message.classList.add("hidden");
+
+    };
+
+    if (!cameraAvailable) {
+
+        image.removeAttribute("src");
+
+        image.classList.add("hidden");
+
+        message.textContent =
+
+            "카메라 연결 대기 중입니다. 연결되면 영상이 자동으로 표시됩니다.";
+
+        message.classList.remove("hidden");
+
+        return;
+
+    }
+
+    message.textContent = "실시간 영상 연결 중...";
+
+    message.classList.remove("hidden");
+
+    image.src =
+
+        "/api/camera/stream?t=" + Date.now();
+
+}
+
+// 실시간 카메라 종료
+
+function stopCamera(imageId, messageId) {
+
+    const image = $(imageId);
+
+    image.removeAttribute("src");
+
+    image.classList.add("hidden");
+
+    $(messageId).classList.remove("hidden");
+
+}
+
+// 일반 CCTV 보기 / 닫기
+
+function toggleCamera() {
+
+    homeCameraOpen = !homeCameraOpen;
+
+    $("homeCamArea").classList.toggle(
+
+        "hidden",
+
+        !homeCameraOpen
+
+    );
+
+    $("toggleCamButton").textContent =
+
+        homeCameraOpen
+
+            ? "영상 닫기 ▴"
+
+            : "영상 보기 ▾";
+
+    if (homeCameraOpen) {
+
+        mountCamera("homeCam", "homeCamMessage");
+
+    } else {
+
+        stopCamera("homeCam", "homeCamMessage");
+
+    }
+
+}
+
+// 현관 초인종 버튼
+
+async function pressDoorbell() {
+
+    try {
+
+        const result = await api(
+
+            "/api/test/event",
+
+            "POST",
+
+            {type: "doorbell"}
+
+        );
+
+        toast("초인종이 울렸습니다.");
+
+        // 서버 WebSocket이 연결되어 있으면 이벤트 수신 시 팝업을 연다.
+
+        // 연결이 끊긴 경우 주기적 이벤트 조회가 복구한다.
+
+        loadData();
+
+    } catch (error) {
+
+        toast(error.message);
+
+    }
+
+}
+
+// 초인종: 사진 저장/출력 없이 실시간 영상만 표시
+
+function visitorPopup() {
+
+    $("visitorOverlay").classList.remove("hidden");
+
+    mountCamera("visitorCam", "visitorMessage");
+
+}
+
+// 방문자 팝업 닫기
+
+function closeVisitor() {
+
+    $("visitorOverlay").classList.add("hidden");
+
+    stopCamera(
+
+        "visitorCam",
+
+        "visitorMessage"
+
+    );
+
+}
+
+// 로그인 화면 없이도 원격 열기 버튼에서는 도어락 비밀번호 확인
+
+function askUnlockPassword() {
+
+    return new Promise(resolve => {
+
+        const dialog = $("unlockDialog");
+
+        const input = $("unlockPassword");
+
+        input.value = "";
+
+        const onClose = () => {
+
+            dialog.removeEventListener("close", onClose);
+
+            const password = dialog.returnValue === "confirm" ? input.value : null;
+
+            input.value = "";
+
+            resolve(password);
+
+        };
+
+        dialog.addEventListener("close", onClose);
+
+        dialog.showModal();
+
+        input.focus();
+
+    });
+
+}
+
+// 문 열기
+
+async function openDoor() {
+
+    const password = await askUnlockPassword();
+
+    if (!password) return;
+
+    try {
+
+        const result = await api("/api/door/open", "POST", {password});
+
+        toast(result.message);
+
+        closeVisitor();
+
+        loadData();
+
+    } catch (error) {
+
+        toast(error.message);
+
+    }
+
+}
+
+// 방문 거절
+
+async function rejectDoor() {
+
+    try {
+
+        await api(
+
+            "/api/door/reject",
+
+            "POST"
+
+        );
+
+        toast("방문자를 거절했습니다.");
+
+        closeVisitor();
+
+        loadData();
+
+    } catch (error) {
+
+        toast(error.message);
+
+    }
+
+}
+
+// 홈의 출입 기록·보안 기록 버튼 -> 목록 팝업
+
+function openRecords(kind) {
+
+    const access = kind === "access";
+
+    $("recordsTitle").textContent = access ? "🔑 출입 기록" : "🛡️ 보안 기록";
+
+    $("recordsDescription").textContent = access
+
+        ? "비밀번호, 얼굴 인증, 문 열림·잠금 기록입니다. 항목을 누르면 상세 정보를 확인할 수 있습니다."
+
+        : "초인종, 접근 감지, 보안 경고 기록입니다. 항목을 누르면 상세 내용과 저장된 사진을 볼 수 있습니다.";
+
+    $("accessList").classList.toggle("hidden", !access);
+
+    $("securityList").classList.toggle("hidden", access);
+
+    $("recordsOverlay").classList.remove("hidden");
+
+    renderLists();
+
+}
+
+function closeRecords() {
+
+    $("recordsOverlay").classList.add("hidden");
+
+}
+
+// 출입 / 보안 기록 버튼 생성
+
+function recordButton(
+
+    container,
+
+    title,
+
+    detail,
+
+    callback
+
+) {
+
+    const button = document.createElement("button");
+
+    button.className = "record";
+
+    const textBox = document.createElement("span");
+
+    const strong = document.createElement("strong");
+
+    const small = document.createElement("small");
+
+    const arrow = document.createElement("span");
+
+    strong.textContent = title;
+
+    small.textContent = detail;
+
+    arrow.className = "arrow";
+
+    arrow.textContent = "›";
+
+    textBox.append(strong, small);
+
+    button.append(textBox, arrow);
+
+    button.onclick = callback;
+
+    container.append(button);
+
+}
+
+// 기록 상세 + 사진
+
+function openDetail(title, content, photoId = null) {
+
+    $("detailTitle").textContent = title;
+
+    $("detailText").textContent = content;
+
+    $("detailOverlay").classList.remove("hidden");
+
+    const image = $("detailImage");
+
+    const empty = $("detailEmpty");
+
+    image.removeAttribute("src");
+
+    image.classList.add("hidden");
+
+    empty.classList.add("hidden");
+
+    if (photoId !== null) {
+
+        empty.textContent = "사진 불러오는 중...";
+
+        empty.classList.remove("hidden");
+
+        image.onload = () => {
+
+            image.classList.remove("hidden");
+
+            empty.classList.add("hidden");
+
+        };
+
+        image.onerror = () => {
+
+            image.classList.add("hidden");
+
+            empty.textContent =
+
+                "사진 파일을 불러오지 못했습니다.";
+
+        };
+
+        image.src =
+
+            "/api/security/media/" + photoId;
+
+    } else {
+
+        empty.textContent =
+
+            "이 기록에 저장된 사진이 없습니다.";
+
+        empty.classList.remove("hidden");
+
+    }
+
+}
+
+// 기록 팝업 닫기
+
+function closeDetail() {
+
+    $("detailOverlay").classList.add("hidden");
+
+    $("detailOverlay").classList.remove("security-alert-photo");
+
+    $("detailImage").removeAttribute("src");
+
+}
+
+// 기록 목록 표시
+
+function renderLists() {
+
+    const accessArea = $("accessList");
+
+    const securityArea = $("securityList");
+
+    accessArea.replaceChildren();
+
+    securityArea.replaceChildren();
+
+    $("accessCount").textContent = `${accessRows.length}건`;
+
+    $("securityCount").textContent = `${securityRows.length}건`;
+
+    if (!accessRows.length) {
+
+        accessArea.textContent =
+
+            "출입 기록이 없습니다.";
+
+    }
+
+    for (const row of accessRows) {
+
+        recordButton(
+
+            accessArea,
+
+            (row.method === "door_open" ? "🔓 문 열림" :
+
+             row.method === "door_lock" ? "🔒 문 잠금" :
+
+             row.method === "remote" ? "📱 관리자 원격 열기" :
+
+             row.method === "face" ? "👤 얼굴 인식" :
+
+             row.success ? "✅ 인증 성공" : "❌ 인증 실패"),
+
+            `${row.timestamp} · ${row.method}`,
+
+            () => openDetail(
+
+                "출입 기록 상세",
+
+                `시각: ${row.timestamp}\n` +
+
+                `방식: ${row.method}\n` +
+
+                `사용자: ${row.user_name || "미확인"}\n` +
+
+                `내용: ${row.detail || "-"}`
+
+            )
+
+        );
+
+    }
+
+    if (!securityRows.length) {
+
+        securityArea.textContent =
+
+            "보안 기록이 없습니다.";
+
+    }
+
+    const names = {
+
+        doorbell: "🔔 현관 초인종",
+
+        prolonged_presence: "🚨 근접 감지 (5초)",
+
+        door_error: "⚠️ 도어락 제어 오류",
+
+        intrusion: "🚨 침입 경고",
+
+        password_alert: "🔑 비밀번호 3회 실패",
+
+        visitor_rejected: "🚫 방문자 거절",
+
+        known_person: "👤 등록 사용자"
+
+    };
+
+    for (const row of securityRows) {
+
+        recordButton(
+
+            securityArea,
+
+            names[row.event_type] ||
+
+            row.event_type,
+
+            `${row.timestamp} · ${row.message}`,
+
+            () => openDetail(
+
+                "보안 기록 상세",
+
+                `시각: ${row.timestamp}\n` +
+
+                `유형: ${row.event_type}\n` +
+
+                `내용: ${row.message}`,
+
+                row.media_path ? row.id : null
+
+            )
+
+        );
+
+    }
+
+}
+
+// SQLite 기록 조회
+
+async function loadData() {
+
+    try {
+
+        const [state, access, events] =
+
+            await Promise.all([
+
+                api("/api/admin/status"),
+
+                api("/api/access/logs"),
+
+                api("/api/security/events")
+
+            ]);
+
+        updateStatus(state);
+
+        accessRows = access;
+
+        securityRows = events;
+
+        // Socket.IO 연결이 없어도 3초 폴링으로 새 초인종/접근 경고 표시.
+
+        // 첫 로드의 오래된 기록에 대해서는 팝업을 다시 띄우지 않는다.
+
+        const maxId = events.reduce((max, ev) => Math.max(max, Number(ev.id) || 0), 0);
+
+        if (lastSecurityEventId !== null && (!socket || !socket.connected)) {
+
+            const newer = events
+
+                .filter(ev => Number(ev.id) > lastSecurityEventId)
+
+                .sort((a, b) => Number(a.id) - Number(b.id));
+
+            for (const ev of newer) handleAlert(ev);
+
+        }
+
+        lastSecurityEventId = Math.max(lastSecurityEventId || 0, maxId);
+
+        renderLists();
+
+        $("netChip").textContent = "연결됨";
+
+        $("netChip").classList.add("online");
+
+    } catch (error) {
+
+        $("netChip").textContent = "서버 연결 오류";
+
+        $("netChip").classList.remove("online");
+
+        console.error(error);
+
+    }
+
+}
+
+// 실시간 보안 경고 표시 (초인종은 실시간 영상 팝업만)
+
+function displayNextSecurityAlert() {
+
+    if (currentSecurityAlert || !pendingSecurityAlerts.length) return;
+
+    currentSecurityAlert = pendingSecurityAlerts.shift();
+
+    const event = currentSecurityAlert;
+
+    const titles = {
+
+        prolonged_presence: "🚨 현관 접근 감지",
+
+        intrusion: "🚨 침입 경고",
+
+        password_alert: "⚠️ 비밀번호 연속 오류",
+
+        door_error: "⚠️ 도어락 이상 감지"
+
+    };
+
+    $("securityAlertTitle").textContent = titles[event.event_type] || "⚠️ 보안 경고";
+
+    $("securityAlertTime").textContent = event.timestamp || "";
+
+    $("securityAlertMessage").textContent = event.message || "보안 이벤트가 발생했습니다.";
+
+        const photoButton = $("securityAlertPhotoButton");
+
+    const hasPhoto = Boolean(event.media_path) && Number(event.id) > 0;
+
+    photoButton.disabled = !hasPhoto;
+
+    photoButton.title = hasPhoto ? "저장된 경고 사진 확인" : "저장된 사진이 없습니다";
+
+    photoButton.style.opacity = hasPhoto ? "1" : "0.5";
+
+    $("securityAlertOverlay").classList.remove("hidden");
+
+}
+
+function viewSecurityAlertPhoto() {
+
+    const event = currentSecurityAlert;
+
+    if (!event || !event.media_path || !(Number(event.id) > 0)) return;
+
+    $("detailOverlay").classList.add("security-alert-photo");
+
+    openDetail(
+
+        $("securityAlertTitle").textContent,
+
+        (event.timestamp || "") + "\n" + (event.message || ""),
+
+        Number(event.id)
+
+    );
+
+}
+
+function closeSecurityAlert() {
+
+    $("securityAlertOverlay").classList.add("hidden");
+
+    currentSecurityAlert = null;
+
+    displayNextSecurityAlert();
+
+}
+
+const SECURITY_POPUP_TYPES = new Set([
+
+    "prolonged_presence", "intrusion", "password_alert", "door_error"
+
+]);
+
+function handleAlert(event) {
+
+    if (!event || !event.event_type) return;
+
+    const id = Number(event.id);
+
+    if (id > 0 && notifiedEventIds.has(id)) return;
+
+    if (id > 0) {
+
+        notifiedEventIds.add(id);
+
+        lastSecurityEventId = Math.max(lastSecurityEventId || 0, id);
+
+        // 메모리 무한 증가 방지
+
+        if (notifiedEventIds.size > 300) notifiedEventIds.clear();
+
+    }
+
+    if (event.event_type === "doorbell") {
+
+        visitorPopup();
+
+    } else if (SECURITY_POPUP_TYPES.has(event.event_type)) {
+
+        pendingSecurityAlerts.push(event);
+
+        displayNextSecurityAlert();
+
+    }
+
+}
+
+// 테스트 이벤트
+
+async function testEvent(type) {
+
+    try {
+
+        const result = await api(
+
+            "/api/test/event",
+
+            "POST",
+
+            {type}
+
+        );
+
+        toast(result.message);
+
+        loadData();
+
+    } catch (error) {
+
+        toast(error.message);
+
+    }
+
+}
+
+// 얼굴 등록 테스트
+
+async function testFace() {
+
+    const label = $("faceLabel").value.trim();
+
+    if (!label) {
+
+        toast("얼굴 라벨을 입력하세요.");
+
+        return;
+
+    }
+
+    try {
+
+        const result = await api(
+
+            "/api/test/event",
+
+            "POST",
+
+            {
+
+                type: "face_registered",
+
+                face_label: label
+
+            }
+
+        );
+
+        toast(result.message);
+
+        loadData();
+
+    } catch (error) {
+
+        toast(error.message);
+
+    }
+
+}
+
+// 112 신고
+
+function call112() {
+
+    if (confirm(
+
+        "실제 긴급 상황입니까?\n" +
+
+        "확인을 누르면 전화 앱으로 연결합니다."
+
+    )) {
+
+        window.location.href = "tel:112";
+
+    }
+
+}
+
+// WebSocket 연결
+
+function connectSocket() {
+
+    if (typeof io === "undefined") {
+
+        toast(
+
+            "실시간 알림 라이브러리를 불러오지 못했습니다."
+
+        );
+
+        return;
+
+    }
+
+    socket = io();
+
+    socket.on("security_alert", event => {
+
+        handleAlert(event);
+
+        loadData();
+
+    });
+
+    socket.on("access_updated", loadData);
+
+    socket.on("status_updated", updateStatus);
+
+}
+
+// 시작
+
+connectSocket();
+
+loadData();
+
+setInterval(loadData, 3000);
+
+</script>
+
+</body>
+
+</html>

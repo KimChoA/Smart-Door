@@ -1,0 +1,323 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Doorlock</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0b0f16;
+            font-family: Arial, sans-serif;
+        }
+
+        .doorlock {
+            width: 320px;
+            max-width: calc(100vw - 32px);
+            padding: 30px 26px;
+            background: #171e2a;
+            border: 1px solid #2b3545;
+            border-radius: 20px;
+            box-shadow: 0 16px 45px rgba(0, 0, 0, 0.35);
+            text-align: center;
+        }
+
+        h2 {
+            margin: 0 0 28px;
+            color: #f4f7ff;
+            font-size: 26px;
+            letter-spacing: 0.5px;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 11px;
+        }
+
+        button {
+            height: 58px;
+            border: 1px solid #344155;
+            border-radius: 12px;
+            background: #283345;
+            color: #f4f7ff;
+            font-size: 21px;
+            font-weight: 600;
+            cursor: pointer;
+            transition:
+                background 0.15s ease,
+                transform 0.1s ease;
+        }
+
+        button:hover {
+            background: #35455c;
+        }
+
+        button:active {
+            background: #4b92e9;
+            transform: scale(0.96);
+        }
+
+        .message {
+            min-height: 20px;
+            margin-top: 22px;
+            font-size: 13px;
+            color: #9aaec6;
+        }
+
+        .message.success {
+            color: #4ade80;
+        }
+
+        .message.error {
+            color: #f87171;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="doorlock">
+
+        <h2>Smart Door</h2>
+
+        <div class="keypad">
+
+            <button onclick="inputNumber('1')">1</button>
+            <button onclick="inputNumber('2')">2</button>
+            <button onclick="inputNumber('3')">3</button>
+
+            <button onclick="inputNumber('4')">4</button>
+            <button onclick="inputNumber('5')">5</button>
+            <button onclick="inputNumber('6')">6</button>
+
+            <button onclick="inputNumber('7')">7</button>
+            <button onclick="inputNumber('8')">8</button>
+            <button onclick="inputNumber('9')">9</button>
+
+            <button class="submit-btn"
+                    onclick="sendPassword()">*</button>
+
+            <button onclick="inputNumber('0')">0</button>
+
+            <button class="clear-btn"
+                    onclick="clearPassword()">#</button>
+
+        </div>
+
+        <div class="message" id="message"></div>
+
+    </div>
+
+    <script>
+        let password = "";
+        let sending = false;
+
+        const message = document.getElementById("message");
+
+        // 브라우저에서 소리 재생
+        let audioContext = null;
+
+        function playTone(frequency, duration, delay = 0) {
+            try {
+                if (!audioContext) {
+                    audioContext = new (
+                        window.AudioContext ||
+                        window.webkitAudioContext
+                    )();
+                }
+
+                if (audioContext.state === "suspended") {
+                    audioContext.resume();
+                }
+
+                const oscillator = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                oscillator.type = "sine";
+                oscillator.frequency.value = frequency;
+
+                oscillator.connect(gain);
+                gain.connect(audioContext.destination);
+
+                const start = audioContext.currentTime + delay;
+
+                gain.gain.setValueAtTime(0.08, start);
+                gain.gain.exponentialRampToValueAtTime(
+                    0.001,
+                    start + duration
+                );
+
+                oscillator.start(start);
+                oscillator.stop(start + duration);
+            } catch (error) {
+                console.error("소리 재생 오류:", error);
+            }
+        }
+
+        // 키패드 입력음
+        function playKeySound() {
+            playTone(750, 0.07);
+        }
+
+        // 비밀번호 오류음
+        function playErrorSound() {
+                // 강렬한 3회 경고음
+                playTone(850, 0.18);
+                playTone(350, 0.18, 0.20);
+
+                playTone(850, 0.18, 0.42);
+                playTone(350, 0.18, 0.62);
+
+                playTone(850, 0.25, 0.84);
+                playTone(250, 0.35, 1.10);
+            }
+
+        // 문 열림 성공음
+        function playSuccessSound() {
+            playTone(650, 0.12);
+            playTone(900, 0.18, 0.14);
+        }
+
+        // 숫자 버튼
+        function inputNumber(number) {
+            if (sending) return;
+
+            // 6자리를 초과해도 버튼 소리는 재생
+            playKeySound();
+
+            // 비밀번호는 최대 6자리까지만 저장
+            if (password.length >= 6) return;
+
+            password += number;
+
+            message.textContent = "";
+            message.className = "message";
+        }
+
+        // # 버튼: 전체 삭제
+        function clearPassword() {
+            if (sending) return;
+
+            playTone(450, 0.09);
+
+            password = "";
+            message.textContent = "";
+            message.className = "message";
+        }
+
+        // 문 열림 안내는 시간 추측이 아니라 서버의 잠금 복귀 완료 여부로 닫는다.
+        // 서보의 실제 잠금 상태를 감지하는 센서는 없으므로 제어 명령 완료 기준이다.
+        async function waitForRelock() {
+            const deadline = Date.now() + 15000;
+            while (Date.now() < deadline) {
+                await new Promise(resolve => setTimeout(resolve, 300));
+                try {
+                    const response = await fetch("/api/door/status", {
+                        cache: "no-store"
+                    });
+                    if (!response.ok) continue;
+                    const status = await response.json();
+
+                    if (status.door_motion_error) {
+                        message.textContent = status.door_motion_error;
+                        message.className = "message error";
+                        return;
+                    }
+                    if (!status.door_active && status.door_locked) {
+                        message.textContent = "";
+                        message.className = "message";
+                        return;
+                    }
+                } catch (error) {
+                    // 잠깐의 네트워크 오류는 다음 조회에서 재시도
+                    console.warn("문 상태 조회 실패:", error);
+                }
+            }
+            message.textContent = "잠금 복귀 상태를 확인하지 못했습니다.";
+            message.className = "message error";
+        }
+
+        // * 버튼: 비밀번호 인증
+        async function sendPassword() {
+            if (sending) return;
+
+            playKeySound();
+
+            if (password.length !== 6) {
+                password = "";
+                message.textContent = "비밀번호가 틀렸습니다.";
+                message.className = "message error";
+
+                playErrorSound();
+                return;
+            }
+
+            sending = true;
+
+            const enteredPassword = password;
+            password = "";
+
+            message.textContent = "";
+            message.className = "message";
+
+            try {
+                const response = await fetch("/api/door/unlock", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        password: enteredPassword
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success === true) {
+                    message.textContent = "문이 열립니다.";
+                    message.className = "message success";
+
+                    playSuccessSound();
+                    await waitForRelock();
+                } else if (response.status === 503) {
+                    message.textContent = "도어락 설정 오류";
+                    message.className = "message error";
+
+                    playErrorSound();
+                } else {
+                    message.textContent = "비밀번호가 틀렸습니다.";
+                    message.className = "message error";
+
+                    playErrorSound();
+                }
+
+            } catch (error) {
+                message.textContent = "서버 통신 오류";
+                message.className = "message error";
+
+                playErrorSound();
+                console.error(error);
+
+            } finally {
+                password = "";
+                sending = false;
+            }
+        }
+    </script>
+
+
+</body>
+</html>
